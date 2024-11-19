@@ -4,6 +4,7 @@
 import os
 from typing import cast
 
+from nginx_ldap_auth.app.models import User
 from fastapi import FastAPI, Request, Response, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
