@@ -78,7 +78,7 @@ class Settings(BaseSettings):
     #: The base DN under which to perform searches
     ldap_basedn: str
     #: The LDAP attribute to use as the username when searching for a user
-    ldap_username_attribute: str = 'uid'
+    ldap_username_attribute: str = 'sAMAccountName'
     #: The LDAP attribute to use as the full name when getting search results
     ldap_full_name_attribute: str = 'cn'
     #: The LDAP search filter to use when searching for a user.  This should

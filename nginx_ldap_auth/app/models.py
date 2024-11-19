@@ -69,7 +69,8 @@ class UserManager:
             expires=self.settings.ldap_pool_connection_lifetime_seconds
         )
         await self.pool.open()
-
+class UserManager:
+    ...
     async def authenticate(self, username: str, password: str) -> bool:
         """
         Authenticate a user against the LDAP server.
@@ -98,7 +99,7 @@ class UserManager:
         except AuthenticationError:
             return False
         except LDAPError:
-            logger.exception('ldap.authenticate.exception', uid=username)
+            logger.exception('ldap.authenticate.exception', username=username)
             raise
         return True
 
@@ -241,11 +242,10 @@ class UserManager:
 
 
 class User(BaseModel):
-
     objects: ClassVar["UserManager"] = UserManager()
 
     #: The username of the user.
-    uid: str
+    username: str  # Changed from uid to username
     #: The full name of the user.  We really only use this for logging.
     full_name: str
 
@@ -259,15 +259,25 @@ class User(BaseModel):
         Returns:
             ``True`` if the user is authenticated, ``False`` otherwise
         """
-        return await self.objects.authenticate(self.uid, password)
+        return await self.objects.authenticate(self.username, password)
 
     @classmethod
     def parse_ldap(cls, data: LDAPObject) -> "User":
+        # Log the LDAP object
+        logger.info(f"LDAP object: {data}")
+
         kwargs = {
-            'uid': data['uid'][0],
-            'full_name': data['cn'][0],
+            'username': data['sAMAccountName'][0],  # Changed from uid to username
+            'full_name': data['displayName'][0],  # Changed from cn to displayName
         }
-        return cls(**kwargs)
+
+        # Create the User object
+        user = cls(**kwargs)
+
+        # Log the created User object
+        logger.info(f"Created User object: {user}")
+
+        return user
 
 
 UserManager.model = User
